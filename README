@@ -1,0 +1,84 @@
+eAPI scripts written for the ACE training lab. These scripts make some assumptions, such
+as there being switches numbered 10.0.0.x where x is the student switch number. If you've
+taken the Arista ACE or APE classes, you will recognize the lab layout. 
+
+Note that it is unlikely that these scripts will be useful as-is due to the nature of
+the fact that they were written for the training racks. They are offered as examples
+of working code that that you may ruthlessly copy what you need to make your scripts work.
+
+SiteVariables.py  	A file with variables that are imported in order to make 
+			the scripts portable between labs of different sizes.
+
+ShowSwitchInfo.py  	This switch iterates through all of the switches in the lab and
+			gets the output of "show version", out of which it displays 
+			the following: 
+
+			$ ./ShowSwitchInfo.py 
+
+			Switch      Device Type          Serial#     Memory  EOS
+			-------------------------------------------------------------
+			Student-01:  DCS-7150S-24-F       JPE13160943 3978148 4.15.5M
+			Student-02:  DCS-7150S-24-F       JPE13160960 4017112 4.12.5
+			Student-03:  DCS-7150S-24-F       JPE13020368 3978148 4.15.5M
+			Student-04:  DCS-7150S-24-CL-F    JPE13451306 3978148 4.15.5M
+			Student-05:  DCS-7150S-24-CL-F    JPE13463487 3978148 4.15.5M
+			[-- snip --]
+ 
+			Note that it does this serially, so it can be slow. 
+
+ShowVer.py  		A similar script, but this one uses Python threading and 
+			curses so that it is *much* faster and updates multiple
+			switches at once. This tool also reports memory util%. It
+			creates output like this: 
+
+	 		Student-01  EOS:[ 4.15.5M ]   Mem Used: [ 80.9% ]
+ 			Student-02  EOS:[ 4.12.5 ]    Mem Used: [ 50.3% ]
+ 			Student-03  EOS:[ 4.15.5M ]   Mem Used: [ 81.5% ]
+ 			Student-04  EOS:[ 4.15.5M ]   Mem Used: [ 81.1% ]
+ 			Student-05  EOS:[ 4.15.5M ]   Mem Used: [ 79.5% ]
+			[-- snip --]
+
+
+BaselineEOS.py  	This script will do the following for every student switch
+			in the lab: 
+	
+			1) Delete all versions of EOS on flash:
+			2) Copy the specified EOSVer to flash:
+			3) Set the boot-config to " + EOSVer
+			4) Issues the 'write erase' command (deletes startup-config)"
+			5) Reload the switch (causing ZTP to trigger if enabled)
+
+			This script uses Python threading and curses so that the entire
+			lab of 20+ switches may be baselined in about six minutes vs.
+			about 1/2 hour when done serially.  
+
+			Output looks like this while running: 
+
+ 			Student-01  Init Baseline: [  ..  ]
+ 			Student-02  Init Baseline: [  ..  ]
+ 			Student-03  Init Baseline: [ Done ]
+ 			Student-04  Init Baseline: [  ..  ]
+ 			Student-05  Init Baseline: [ Done ]
+			[-- snip --]
+			
+
+eAPIShRun.py		A script using eAPI that will get the running config and 
+			save it to a time stamped file. This and ScreenScrapeShRun.py
+			do the same thing via different methods. 
+
+			Output looks like this: 
+
+			$ ./eAPIShRun.py  
+			Saving output to Student-20_2016-05-10_15-31-11
+
+
+ScreenScrapeShRun.py	A script using pexpect (NOT eAPI!) that will get the running
+			config and save it to a timestamped file. This and eAPIShRun.py
+                        do the same thing via different methods.
+
+			Output looks like this: 
+
+			$ ./ScreenScrapeShRun.py  
+			Saving output to Student-20_2016-05-10_15-23-38
+
+	
